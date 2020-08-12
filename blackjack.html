@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blackjack</title>
+    <link rel="stylesheet" href="blackjackstyles.css">
+    <script src="https://kit.fontawesome.com/77d9fc7803.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+    <div class="board">
+       <!-- Dealer section  -->
+        <div class="player-circle" id="dealer">
+            <div class="player-title" id="dealer-title">Dealer</div>
+            <div class="win-points" id="dealer-wins">Wins: 0</div>
+            <div class="card-stack" id="dealer-cards"></div>
+            <div class="player-title" id="dealer-points"></div>
+            <div class="player-title" id="dealer-judgement"></div>
+        </div>
+        
+        <!-- player 1 section  -->
+        <div class="player-circle" id="player-1">
+            <div class="player-title" id="player-1-title">Player 1</div>
+            <div class="win-points" id="player-1-wins">Wins: 0</div>
+            <div class="card-stack" id="player-1-cards"></div>
+            <div class="player-title" id="player-1-points"></div>
+            <div class="player-title" id="player-1-judgement"></div>
+        </div>
+       
+        <!-- player 2 section  -->
+        <div class="player-circle" id="player-2">
+            <div class="player-title" id="player-2-title">Player 2</div>
+            <div class="win-points" id="player-2-wins">Wins: 0</div>
+            <div class="card-stack" id="player-2-cards"></div>
+            <div class="player-title" id="player-2-points">0</div>
+            <div class="player-title" id="player-2-judgement"></div>
+        </div>
+    </div>
+
+    <script src="blackjackscript.js"></script>
+</body>
+</html>
