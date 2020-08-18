@@ -20,7 +20,7 @@ let cardpoint = {
 gamers = {
     dealer: {
         wins: 0,
-        score: 0
+        score: 0,
     },
 
     player1: {
@@ -34,35 +34,74 @@ gamers = {
     },
 }
 
-// Creating cards 
+// Initializing variables
 var allcards = [];
+var randomcards = [];
 
-for(i=0;i<cardsymbols.length;i++){
-    for(j=0;j<cardnumbers.length;j++){
-        tempcard = [cardnumbers[j],cardsymbols[i]];
-        allcards.push(tempcard);
-    }
-}
+newgame();
 
-// Shuffling cards 
-var randomcards = allcards;
 
-for(i=0; i<randomcards.length; i++){
-    shufflepos = Math.floor(Math.random()*randomcards.length);
-    tempcard = randomcards[i];
-    randomcards[i]=randomcards[shufflepos];
-    randomcards[shufflepos]=tempcard;
-}
 
 // Event listeners
+document.querySelector("#player-1-hit").onclick = function() {addcards('player1','#player-1-cards','#player-1-points','#player-1-judgement')};
+document.querySelector("#player-2-hit").onclick = function() {addcards('player2','#player-2-cards','#player-2-points', '#player-2-judgement')};
 
-document.querySelector("#player-1-title").onclick = function() {addcards('player1','#player-1-cards','#player-1-points')};
-document.querySelector("#player-2-title").onclick = function() {addcards('player2','#player-2-cards','#player-2-points')};
-document.querySelector("#dealer-title").onclick = function() {addcards('dealer','#dealer-cards','#dealer-points')};
+document.querySelector("#player-1-stop").onclick = function() {stopturn('player1')};
+document.querySelector("#player-2-stop").onclick = function() {stopturn('player2')};
 
 
-// Function to add cards on click 
-function addcards(gamer, cardsid, pointsid){
+
+
+// Dealing cards
+function dealcards(){
+
+    createandshufflecards();
+
+    // Dealing 2 cards per player
+    for(i=0; i<2; i++){
+        addcards('dealer','#dealer-cards','#dealer-points','#dealer-judgement');
+        addcards('player1','#player-1-cards','#player-1-points','#player-1-judgement');
+        addcards('player2','#player-2-cards','#player-2-points', '#player-2-judgement');
+    }
+    
+    // Hide deal button
+    document.getElementById("dealbutton").style.visibility = "hidden";
+
+    // Reveal player 1 buttons
+    document.getElementById("player-1-hit").style.visibility = "visible";
+    document.getElementById("player-1-stop").style.visibility = "visible";
+}
+
+// Function to create and shuffle cards
+function createandshufflecards(){
+    
+    // Re-initializing cards
+    allcards = [];
+    randomcards = [];
+
+    // Creating cards 
+    for(i=0;i<cardsymbols.length;i++){
+        for(j=0;j<cardnumbers.length;j++){
+            tempcard = [cardnumbers[j],cardsymbols[i]];
+            allcards.push(tempcard);
+        }
+    }
+
+    // Shuffling cards 
+    randomcards = allcards;
+
+    for(i=0; i<randomcards.length; i++){
+        shufflepos = Math.floor(Math.random()*randomcards.length);
+        tempcard = randomcards[i];
+        randomcards[i]=randomcards[shufflepos];
+        randomcards[shufflepos]=tempcard;
+    }
+
+}
+
+
+// Function to add cards and calculate scores and status on click 
+function addcards(gamer, cardsid, pointsid, judgement){
 
     // Picking a random card
     pickcard = randomcards.pop();
@@ -71,9 +110,14 @@ function addcards(gamer, cardsid, pointsid){
     document.querySelector(cardsid).appendChild(getcard(pickcard));
 
     // Add score to gamer points
-    document.querySelector(pointsid).innerHTML = scorecalculate(pickcard, gamer);
+    tempscore = scorecalculate(pickcard, gamer);
+    document.querySelector(pointsid).innerHTML = tempscore;
 
-
+    // Bust status
+    if(tempscore>21){
+        checkstatus(gamer, judgement);
+    }
+   
 }
 
 // // // // // // // // // // // // // // // // // // 
@@ -138,3 +182,123 @@ function scorecalculate(pickedcard, gamername){
 
     return gamers[gamername].score;
 }
+
+function checkstatus(gamername, judgementid){
+    
+    if(gamername=='player1'){
+        document.querySelector(judgementid).innerHTML = "BUST!";
+        stopturn(gamername);
+    }
+   
+    if(gamername=='player2'){
+        document.querySelector(judgementid).innerHTML = "BUST!";
+        stopturn(gamername);
+    }    
+    
+    if(gamername=='dealer'){
+        document.querySelector(judgementid).innerHTML = "BUST!";
+        decidewinner();
+    }
+
+}
+
+function stopturn(gamername){
+    
+    if(gamername=='player1'){
+        
+        document.getElementById("player-1-hit").style.visibility = "hidden";
+        document.getElementById("player-1-stop").style.visibility = "hidden";
+        document.getElementById("player-2-hit").style.visibility = "visible";
+        document.getElementById("player-2-stop").style.visibility = "visible";
+       
+    }
+   
+    if(gamername=='player2'){
+        
+        document.getElementById("player-2-hit").style.visibility = "hidden";
+        document.getElementById("player-2-stop").style.visibility = "hidden";
+        dealerturn();
+        
+    }    
+    
+
+}
+
+// Automating dealer's turn
+function dealerturn(){
+    while(gamers.dealer.score<21){
+        if(gamers.dealer.score<15){
+            addcards('dealer','#dealer-cards','#dealer-points','#dealer-judgement');
+        }
+    }
+    decidewinner();
+}
+
+// Finalizing winners
+function decidewinner(){
+    if(gamers.dealer.score>21 && gamers.player1.score>21 && gamers.player2.score>21){
+        //no one wins
+        winnermessage('No one');
+    } 
+    else if(gamers.dealer.score>gamers.player1.score && gamers.dealer.score>gamers.player2.score && gamers.dealer.score<21){
+        //dealer wins
+        winnermessage('Dealer');
+        gamers.dealer.wins++;
+        document.querySelector("#dealer-wins").innerHTML = "Wins: " + gamers.dealer.wins;
+    }
+    else if(gamers.player1.score>gamers.player2.score && gamers.player1.score>gamers.dealer.score && gamers.player1.score<21){
+        //player 1 wins
+        winnermessage('Player 1');
+        gamers.player1.wins++;
+        document.querySelector("#player-1-wins").innerHTML = "Wins: " + gamers.player1.wins;
+    }
+    else{
+        //player 2 wins
+        winnermessage('Player 2');
+        gamers.player2.wins++;
+        document.querySelector("#player-2-wins").innerHTML = "Wins: " + gamers.player2.wins;
+    }
+}
+
+function winnermessage(whowins){
+    alert(whowins + " wins");
+    alert("Would you like to play another game?");
+    newgame();
+}
+
+function newgame(){
+
+    // // Initializing variables
+    // var allcards = [];
+    // var randomcards = [];
+    
+    // Showing deal button
+    document.getElementById("dealbutton").style.visibility = "visible";
+    
+    // Hiding player 1 and 2 buttons
+    document.getElementById("player-1-hit").style.visibility = "hidden";
+    document.getElementById("player-1-stop").style.visibility = "hidden";
+    document.getElementById("player-2-hit").style.visibility = "hidden";
+    document.getElementById("player-2-stop").style.visibility = "hidden";
+
+    // Resetting scores
+    gamers.dealer.score = 0;
+    gamers.player1.score = 0;
+    gamers.player2.score = 0;
+    document.querySelector("#dealer-points").innerHTML="";
+    document.querySelector("#player-1-points").innerHTML="";
+    document.querySelector("#player-2-points").innerHTML="";
+
+    // Resetting status
+    document.querySelector("#dealer-judgement").innerHTML="";
+    document.querySelector("#player-1-judgement").innerHTML="";
+    document.querySelector("#player-2-judgement").innerHTML="";
+
+    // Removing cards
+    document.querySelector("#dealer-cards").innerHTML = "";
+    document.querySelector("#player-1-cards").innerHTML = "";
+    document.querySelector("#player-2-cards").innerHTML = "";
+
+    
+}
+
